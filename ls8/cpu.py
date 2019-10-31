@@ -2,12 +2,24 @@
 
 import sys
 
+HTL = 0b00000001 # HLT Stops the run
+LDI = 0b10000010 # LDI R0,8
+PRN = 0b01000111, # PRN R0
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+        self.reg = [0] * 8 
+        self.pc = 0
+        
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+    
+    def ram_write(self, MDR, MAR):
+        self.ram[MAR] = MDR
 
     def load(self):
         """Load a program into memory."""
@@ -18,12 +30,12 @@ class CPU:
 
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
+            LDI, # LDI R0,8
             0b00000000,
             0b00001000,
-            0b01000111, # PRN R0
+            PRN, # PRN R0
             0b00000000,
-            0b00000001, # HLT
+            HTL,
         ]
 
         for instruction in program:
@@ -61,5 +73,29 @@ class CPU:
         print()
 
     def run(self):
-        """Run the CPU."""
-        pass
+        running = True
+        
+        while running:
+            """Run the CPU."""
+            # store the memory address in pc in a local variable
+            # this the location of the command that needs to be ran
+            IR = self.ram_read(self.pc)
+
+            # instructions state that up to 2 memory slots will be used
+            # using ram_read, get the next 2 commands and store them
+            # in operand_a / operand_b
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+
+            if IR == HTL:
+                self.pc = 0
+                running = False
+            elif IR == LDI:
+                self.reg[operand_a] = operand_b
+            elif IR == PRN:
+                print(self.reg[operand_a])
+            #    return self.reg[operand_a]
+            self.pc += 1
+            
+        
+        

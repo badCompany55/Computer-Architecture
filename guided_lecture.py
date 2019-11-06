@@ -12,8 +12,6 @@ memory = [
     
     PRINT_NUM,
     NUM_TO_PRINT,
-    
-    PRINT_ZACH,
     PRINT_ZACH,
     SAVE,
     0b1111,

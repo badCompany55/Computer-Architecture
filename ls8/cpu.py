@@ -6,20 +6,24 @@ HTL = 0b00000001 # HLT Stops the run
 LDI = 0b10000010 # LDI R0,8
 PRN = 0b01000111 # PRN R0
 MUL = 0b10100010 # MUL R0,R1
+PUSH = 0b01000101 # Push
+POP = 0b01000110 # Pop
 
 class CPU:
     """Main CPU class."""
-
+    
+  
     def __init__(self):
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.reg = [0] * 8 
         self.pc = 0
+        self.reg[7] = 0xF4
         
     def ram_read(self, MAR):
         return self.ram[MAR]
     
-    def ram_write(self, MDR, MAR):
+    def ram_write(self, MAR, MDR):
         self.ram[MAR] = MDR
 
     def load(self, file):
@@ -27,7 +31,7 @@ class CPU:
         address = 0
         
         program = []
-        f = open(f'./examples/{file}', "r")
+        f = open(f'./examples/{file}.ls8', "r")
         fr = f.readlines()
         for x in fr:
             if "#" not in x and x.strip():
@@ -91,6 +95,17 @@ class CPU:
             print(" %02X" % self.reg[i], end='')
 
         print()
+    
+    def push(self, val):
+        self.reg[7] -= 1
+        self.ram_write(self.reg[7], val)
+#        print("val", val)
+#        print("valueReg:", self.ram[self.reg[7]])
+        
+    def pop(self):
+        val = self.ram[self.reg[7]]
+        self.reg[7] += 1
+        return val
 
     def run(self):
         running = True
@@ -101,9 +116,9 @@ class CPU:
             # this the location of the command that needs to be ran
             IR = self.ram_read(self.pc)
 
-            # instructions state that up to 2 memory slots will be used
-            # using ram_read, get the next 2 commands and store them
-            # in operand_a / operand_b
+#             instructions state that up to 2 memory slots will be used
+#             using ram_read, get the next 2 commands and store them
+#             in operand_a / operand_b
             
             number_of_opers = IR >> 6
             if number_of_opers == 2:
@@ -122,7 +137,11 @@ class CPU:
                 print(self.reg[operand_a])
             elif IR == MUL:
                 self.alu("ALU_MUL", operand_a, operand_b)
-               
+            elif IR == PUSH:
+                self.push(self.reg[operand_a])
+            elif IR == POP:
+                self.reg[operand_a] = self.pop()
+                
             #    return self.reg[operand_a]
             self.pc += number_of_opers + 1
             

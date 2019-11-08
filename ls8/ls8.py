@@ -13,16 +13,16 @@ all_command_args = sys.argv
 
 arg_list = all_command_args[1:]
 
-unixOptions = "hf"
-gnuOptions = ["help", "file="]
+unixOptions = "f:h"
+gnuOptions = ["file=", "help"]
 
 try:
     args, values = getopt.getopt(arg_list, unixOptions, gnuOptions)
-    
+
 except getopt.error as err:
         print(str(err))
         sys.exit(2)
-        
+
 for curr_arg, curr_val in args:
     if curr_arg in ("-f", "--file"):
         print(f'File to Load, {curr_val}')
@@ -30,3 +30,4 @@ for curr_arg, curr_val in args:
         cpu.run()
     elif curr_arg in ("-h", "--help"):
         print("Displaying the Help Information")
+
